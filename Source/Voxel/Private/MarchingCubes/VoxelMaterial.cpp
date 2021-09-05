@@ -15,4 +15,4 @@ FColor UVoxelMaterial::Encode(const int Id)
 	default:
 		return FColor(255,0,0,0);
 	}
-}// TODO -> improve architecture -> improve brush
+}
