@@ -19,12 +19,13 @@ public:
 	FVoxelStats Stats = FVoxelStats();
 	FVoxelStats& StatsRef = Stats;
 	FVoxel* Data;
+	UPROPERTY(BlueprintReadWrite)
 	int Size = 64;
 	
 	UPROPERTY(BlueprintReadWrite)
 	URuntimeMeshComponentStatic* Mesh;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Test")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Voxel Material")
 	UMaterialInstance* Material;
 
 	UVoxelChunk();
@@ -34,6 +35,8 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintCallable)
+	void SetSize(int NewSize);
 	UFUNCTION(BlueprintCallable)
 	void Sculpt(UVoxelBrush* VoxelBrush);
 	UFUNCTION(BlueprintCallable)

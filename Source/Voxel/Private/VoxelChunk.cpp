@@ -18,9 +18,6 @@ void UVoxelChunk::BeginPlay()
 	Mesh->SetMaterial(0, Material);
 	Data = new FVoxel[Size * Size * Size];
 	Generate();
-	UVoxelBrush* Brush = NewObject<UVoxelBrush>();
-	Brush->Location = FVector(8, 8, 8);
-	FVoxelGenerator::Sculpt(Data, Size, Brush);
 	Update();
 }
 
@@ -34,6 +31,13 @@ void UVoxelChunk::BeginDestroy()
 void UVoxelChunk::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UVoxelChunk::SetSize(int NewSize)
+{
+	Size = NewSize;
+	delete Data;
+	Data = new FVoxel[Size * Size * Size];
 }
 
 void UVoxelChunk::Sculpt(UVoxelBrush* VoxelBrush)
@@ -68,6 +72,9 @@ void UVoxelChunk::Update() const
 		                                  MCMesh.Triangles,
 		                                  MCMesh.Normals,
 		                                  TArray<FVector2D>(),
+		                                  TArray<FVector2D>(),
+		                                  TArray<FVector2D>(),
+		                                  TArray<FVector2D>(),
 		                                  MCMesh.Colors,
 		                                  TArray<FRuntimeMeshTangent>(),
 		                                  ERuntimeMeshUpdateFrequency::Average,
@@ -79,6 +86,9 @@ void UVoxelChunk::Update() const
 		                                  MCMesh.Vertices,
 		                                  MCMesh.Triangles,
 		                                  MCMesh.Normals,
+		                                  TArray<FVector2D>(),
+		                                  TArray<FVector2D>(),
+		                                  TArray<FVector2D>(),
 		                                  TArray<FVector2D>(),
 		                                  MCMesh.Colors,
 		                                  TArray<FRuntimeMeshTangent>());

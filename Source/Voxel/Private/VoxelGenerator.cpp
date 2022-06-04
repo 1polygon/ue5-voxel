@@ -55,5 +55,6 @@ FVoxel FVoxelGenerator::GetVoxel(const FVector Position)
 	const float Scale = 7;
 	const float Height = Noise.GetNoise(Position.X * Scale, Position.Y * Scale) * 4.0 + 8;
 	VoxelData.Density = Position.Z - Height;
+	if(Position.Z < -8) VoxelData.Id = 1;
 	return VoxelData;
 }

@@ -7,6 +7,6 @@ public:
 	FMCMesh();
 	TArray<FVector> Vertices;
 	TArray<FVector> Normals;
-	TArray<FColor> Colors;
+	TArray<FLinearColor> Colors;
 	TArray<int> Triangles;
 };

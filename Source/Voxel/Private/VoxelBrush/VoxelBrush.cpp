@@ -16,7 +16,7 @@ UVoxelBrush::UVoxelBrush(UVoxelShape* Shape)
 void UVoxelBrush::Paint(FVoxel& Voxel, FVector& VoxelPosition, const int MaterialId)
 {
 	const float Dist = Shape->SignedDistance(VoxelPosition, Location);
-	if(Dist < 1.0) Voxel.Id = MaterialId;
+	if(Dist < 0.0) Voxel.Id = MaterialId;
 }
 
 void UVoxelBrush::Sculpt(FVoxel& Voxel, FVector& VoxelPosition)
