@@ -74,7 +74,7 @@ void UVoxelChunk::Update() const
 		                                  TArray<FVector2D>(),
 		                                  MCMesh.Colors,
 		                                  TArray<FRuntimeMeshTangent>(),
-		                                  ERuntimeMeshUpdateFrequency::Frequent,
+		                                  ERuntimeMeshUpdateFrequency::Infrequent,
 		                                  true);
 	}
 	else
