@@ -72,12 +72,9 @@ void UVoxelChunk::Update() const
 		                                  MCMesh.Triangles,
 		                                  MCMesh.Normals,
 		                                  TArray<FVector2D>(),
-		                                  TArray<FVector2D>(),
-		                                  TArray<FVector2D>(),
-		                                  TArray<FVector2D>(),
 		                                  MCMesh.Colors,
 		                                  TArray<FRuntimeMeshTangent>(),
-		                                  ERuntimeMeshUpdateFrequency::Average,
+		                                  ERuntimeMeshUpdateFrequency::Infrequent,
 		                                  true);
 	}
 	else
@@ -86,9 +83,6 @@ void UVoxelChunk::Update() const
 		                                  MCMesh.Vertices,
 		                                  MCMesh.Triangles,
 		                                  MCMesh.Normals,
-		                                  TArray<FVector2D>(),
-		                                  TArray<FVector2D>(),
-		                                  TArray<FVector2D>(),
 		                                  TArray<FVector2D>(),
 		                                  MCMesh.Colors,
 		                                  TArray<FRuntimeMeshTangent>());
