@@ -3,9 +3,10 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "VoxelStats.h"
-#include "Components/RuntimeMeshComponentStatic.h"
 #include "MarchingCubes/VoxelData.h"
 #include "VoxelBrush/VoxelBrush.h"
+#include "RealtimeMeshComponent/Public/RealtimeMeshComponent.h"
+#include "RealtimeMeshSimple.h"
 
 #include "VoxelChunk.generated.h"
 
@@ -23,8 +24,13 @@ public:
 	int Size = 64;
 	
 	UPROPERTY(BlueprintReadWrite)
-	URuntimeMeshComponentStatic* Mesh;
+	URealtimeMeshComponent* RealtimeMeshComponent;
 
+	UPROPERTY()
+	TObjectPtr<URealtimeMeshSimple> RealtimeMesh;
+
+	FRealtimeMeshSectionKey MeshSectionKey;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Voxel Material")
 	UMaterialInstance* Material;
 
@@ -44,5 +50,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Generate() const;
 	UFUNCTION(BlueprintCallable)
-	void Update() const;	
+	void Update();	
 };

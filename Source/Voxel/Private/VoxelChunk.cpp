@@ -2,7 +2,6 @@
 
 #include "VoxelGenerator.h"
 #include "MarchingCubes/MeshBuilder.h"
-#include "MarchingCubes/MeshData.h"
 #include "VoxelStats.h"
 
 UVoxelChunk::UVoxelChunk()
@@ -13,9 +12,10 @@ UVoxelChunk::UVoxelChunk()
 void UVoxelChunk::BeginPlay()
 {
 	Super::BeginPlay();
-	Mesh = NewObject<URuntimeMeshComponentStatic>(GetOwner());
-	Mesh->RegisterComponent();
-	Mesh->SetMaterial(0, Material);
+	RealtimeMeshComponent = NewObject<URealtimeMeshComponent>(GetOwner());
+	RealtimeMeshComponent->RegisterComponent();
+	RealtimeMeshComponent->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform);
+	RealtimeMeshComponent->SetMaterial(0, Material);
 	Data = new FVoxel[Size * Size * Size];
 	Generate();
 	Update();
@@ -57,35 +57,26 @@ void UVoxelChunk::Generate() const
 	StatsRef.GenerateTime = (FPlatformTime::Seconds() - StartTime) * 1000;
 }
 
-void UVoxelChunk::Update() const
+void UVoxelChunk::Update()
 {
 	const double StartTime = FPlatformTime::Seconds();
 	FMCMeshBuilder MeshBuilder;
-	const FMCMesh MCMesh = MeshBuilder.Build(Data, Size - 1);
-	StatsRef.VertexCount = MCMesh.Vertices.Num();
-	StatsRef.TriangleCount = MCMesh.Triangles.Num();
 
-	if (Mesh->GetSectionIds(0).Num() == 0)
+	FRealtimeMeshSimpleMeshData MeshData;
+	MeshBuilder.Build(Data, Size - 1, MeshData);
+	StatsRef.VertexCount = MeshData.Positions.Num();
+	StatsRef.TriangleCount = MeshData.Triangles.Num();
+
+	if (!IsValid(RealtimeMesh))
 	{
-		Mesh->CreateSectionFromComponents(0, 0, 0,
-		                                  MCMesh.Vertices,
-		                                  MCMesh.Triangles,
-		                                  MCMesh.Normals,
-		                                  TArray<FVector2D>(),
-		                                  MCMesh.Colors,
-		                                  TArray<FRuntimeMeshTangent>(),
-		                                  ERuntimeMeshUpdateFrequency::Infrequent,
-		                                  true);
+		RealtimeMesh = RealtimeMeshComponent->InitializeRealtimeMesh<URealtimeMeshSimple>();
+		MeshSectionKey = RealtimeMesh->CreateMeshSection(0,
+		                                                 FRealtimeMeshSectionConfig(
+			                                                 ERealtimeMeshSectionDrawType::Dynamic, 0), MeshData, true);
 	}
 	else
 	{
-		Mesh->UpdateSectionFromComponents(0, 0,
-		                                  MCMesh.Vertices,
-		                                  MCMesh.Triangles,
-		                                  MCMesh.Normals,
-		                                  TArray<FVector2D>(),
-		                                  MCMesh.Colors,
-		                                  TArray<FRuntimeMeshTangent>());
+		RealtimeMesh->UpdateSectionMesh(MeshSectionKey, MeshData);
 	}
 
 	StatsRef.UpdateTime = (FPlatformTime::Seconds() - StartTime) * 1000;

@@ -1,12 +1,13 @@
 ﻿#include "MeshBuilder.h"
 
 #include "MarchingCubes/MeshBuilder.h"
+
+#include "RealtimeMeshSimple.h"
 #include "MarchingCubes/MeshData.h"
 #include "MarchingCubes/VoxelMaterial.h"
 
-FMCMesh FMCMeshBuilder::Build(FVoxel* Data, int Size)
+void FMCMeshBuilder::Build(const FVoxel* Data, const int Size, FRealtimeMeshSimpleMeshData& MeshData)
 {
-	FMCMesh Mesh;
 	TArray<FVector> NewTriangles;
 
 	const float VoxelSize = 100.0;
@@ -42,7 +43,7 @@ FMCMesh FMCMeshBuilder::Build(FVoxel* Data, int Size)
 
 		// Material
 		const FVoxel Voxel = Data[GetIndex(x, y, z, Size + DataPadding)];
-		Mesh.Colors.Add(UVoxelMaterial::Encode(Voxel.Id));
+		MeshData.Colors.Add(UVoxelMaterial::Encode(Voxel.Id));
 
 		// Normal
 		FVector Grad;
@@ -50,15 +51,13 @@ FMCMesh FMCMeshBuilder::Build(FVoxel* Data, int Size)
 		Grad.Y = Data[GetIndex(x, y - 1, z, Size + DataPadding)].Density - Data[GetIndex(x, y + 1, z, Size + DataPadding)].Density;
 		Grad.Z = Data[GetIndex(x, y, z - 1, Size + DataPadding)].Density - Data[GetIndex(x, y, z + 1, Size + DataPadding)].Density;
 		Grad.Normalize();
-		Mesh.Normals.Add(-Grad);
+		MeshData.Normals.Add(-Grad);
 		
 		// Vertex
-		Mesh.Vertices.Add(FVector(v->X * VoxelSize, v->Y * VoxelSize, v->Z * VoxelSize));
+		MeshData.Positions.Add(FVector(v->X * VoxelSize, v->Y * VoxelSize, v->Z * VoxelSize));
 	}
 	
-	for (int i = 0; i < Triangles.Num(); i++) Mesh.Triangles.Add(Triangles[i]);
-
-	return Mesh;
+	for (int i = 0; i < Triangles.Num(); i++) MeshData.Triangles.Add(Triangles[i]);
 }
 
 void FMCMeshBuilder::SetVectors(FVector* V, const float X, const float Y, const float Z)

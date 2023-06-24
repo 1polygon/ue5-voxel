@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "MarchingCubes.h"
 #include "MeshData.h"
+#include "RealtimeMeshSimple.h"
 #include "VoxelData.h"
 
 class FMCMeshBuilder
@@ -20,6 +21,6 @@ private:
 	static FVector ComputeNormal(FVector V1, FVector V2, FVector V3);
 	static int GetIndex(int X, int Y, int Z, int Size);
 public:
-	FMCMesh Build(FVoxel* Data, int Size);
+	void Build(const FVoxel* Data, int Size, FRealtimeMeshSimpleMeshData& MeshData);
 };
 
