@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "VoxelStats.h"
-#include "Components/RuntimeMeshComponentStatic.h"
+#include "Components/DynamicMeshComponent.h"
 #include "MarchingCubes/VoxelData.h"
 #include "VoxelBrush/VoxelBrush.h"
 
@@ -23,7 +23,7 @@ public:
 	int Size = 64;
 	
 	UPROPERTY(BlueprintReadWrite)
-	URuntimeMeshComponentStatic* Mesh;
+	UDynamicMeshComponent* MeshComponent;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Voxel Material")
 	UMaterialInstance* Material;
