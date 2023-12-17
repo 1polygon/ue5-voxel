@@ -49,16 +49,16 @@ void FMarchingCubes::InsertTrianglesOfCube(FVector* P, float* Val, TArray<FVecto
 
 FVector FMarchingCubes::InterpolateVertex(const float Iso, const FVector P1, const FVector P2, const float ValP1, const float ValP2) const
 {
-	if (_CMATH_::abs(Iso - ValP1) < 0.00001) return (P1);
-	if (_CMATH_::abs(Iso - ValP2) < 0.00001) return (P2);
-	if (_CMATH_::abs(ValP1 - ValP2) < 0.00001) return (P1);
-
+	if (FMath::Abs(Iso - ValP1) < 0.00001) return (P1);
+	if (FMath::Abs(Iso - ValP2) < 0.00001) return (P2);
+	if (FMath::Abs(ValP1 - ValP2) < 0.00001) return (P1);
+	
 	const float Mu = (Iso - ValP1) / (ValP2 - ValP1);
 	
-	FVector p;
-	p.X = P1.X + Mu * (P2.X - P1.X);
-	p.Y = P1.Y + Mu * (P2.Y - P1.Y);
-	p.Z = P1.Z + Mu * (P2.Z - P1.Z);
+	FVector P;
+	P.X = P1.X + Mu * (P2.X - P1.X);
+	P.Y = P1.Y + Mu * (P2.Y - P1.Y);
+	P.Z = P1.Z + Mu * (P2.Z - P1.Z);
 
-	return p;
+	return P;
 }

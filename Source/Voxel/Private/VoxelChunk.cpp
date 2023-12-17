@@ -4,6 +4,7 @@
 #include "MarchingCubes/MeshBuilder.h"
 #include "MarchingCubes/MeshData.h"
 #include "VoxelStats.h"
+#include "DynamicMesh/MeshAttributeUtil.h"
 
 UVoxelChunk::UVoxelChunk()
 {
@@ -13,9 +14,14 @@ UVoxelChunk::UVoxelChunk()
 void UVoxelChunk::BeginPlay()
 {
 	Super::BeginPlay();
-	Mesh = NewObject<URuntimeMeshComponentStatic>(GetOwner());
-	Mesh->RegisterComponent();
-	Mesh->SetMaterial(0, Material);
+	MeshComponent = NewObject<UDynamicMeshComponent>(GetOwner());
+	MeshComponent->RegisterComponent();
+	MeshComponent->SetMaterial(0, Material);
+	MeshComponent->SetComplexAsSimpleCollisionEnabled(true, true);
+	MeshComponent->bUseAsyncCooking = true;
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MeshComponent->SetGenerateOverlapEvents(true);
+	MeshComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	Data = new FVoxel[Size * Size * Size];
 	Generate();
 	Update();
@@ -61,32 +67,40 @@ void UVoxelChunk::Update() const
 {
 	const double StartTime = FPlatformTime::Seconds();
 	FMCMeshBuilder MeshBuilder;
-	const FMCMesh MCMesh = MeshBuilder.Build(Data, Size - 1);
-	StatsRef.VertexCount = MCMesh.Vertices.Num();
-	StatsRef.TriangleCount = MCMesh.Triangles.Num();
+	const FMCMesh MeshData = MeshBuilder.Build(Data, Size - 1);
+	StatsRef.VertexCount = MeshData.Vertices.Num();
+	StatsRef.TriangleCount = MeshData.Triangles.Num();
 
-	if (Mesh->GetSectionIds(0).Num() == 0)
+	TArray<int32> Indices;
+	FDynamicMesh3* Mesh = MeshComponent->GetMesh();
+	Mesh->Clear();
+	Mesh->EnableVertexNormals(FVector3f());
+	Mesh->EnableVertexColors(FVector4f());
+
+	Mesh->EnableAttributes();
+	Mesh->Attributes()->EnablePrimaryColors();
+	const auto ColorOverlay = Mesh->Attributes()->PrimaryColors();
+
+	for (int i = 0; i < MeshData.Vertices.Num(); i++)
 	{
-		Mesh->CreateSectionFromComponents(0, 0, 0,
-		                                  MCMesh.Vertices,
-		                                  MCMesh.Triangles,
-		                                  MCMesh.Normals,
-		                                  TArray<FVector2D>(),
-		                                  MCMesh.Colors,
-		                                  TArray<FRuntimeMeshTangent>(),
-		                                  ERuntimeMeshUpdateFrequency::Infrequent,
-		                                  true);
+		int Id = Mesh->AppendVertex(MeshData.Vertices[i]);
+		Indices.Add(Id);
+		Mesh->SetVertexNormal(Id, FVector3f(MeshData.Normals[i]));
+		Mesh->SetVertexColor(Id, FVector4f(MeshData.Colors[i]));
+		ColorOverlay->AppendElement(MeshData.Colors[i]);
 	}
-	else
+
+	for (int i = 0; i < MeshData.Triangles.Num(); i += 3)
 	{
-		Mesh->UpdateSectionFromComponents(0, 0,
-		                                  MCMesh.Vertices,
-		                                  MCMesh.Triangles,
-		                                  MCMesh.Normals,
-		                                  TArray<FVector2D>(),
-		                                  MCMesh.Colors,
-		                                  TArray<FRuntimeMeshTangent>());
+		const int T0 = Indices[MeshData.Triangles[i]];
+		const int T1 = Indices[MeshData.Triangles[i + 1]];
+		const int T2 = Indices[MeshData.Triangles[i + 2]];
+		const int Id = Mesh->AppendTriangle(T0, T1, T2);
+		ColorOverlay->SetTriangle(Id, UE::Geometry::FIndex3i(T0, T1, T2));
 	}
+
+	MeshComponent->NotifyMeshUpdated();
+	MeshComponent->UpdateCollision(false);
 
 	StatsRef.UpdateTime = (FPlatformTime::Seconds() - StartTime) * 1000;
 }
